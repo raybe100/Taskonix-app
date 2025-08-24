@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import './styles/darkMode.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 139 115 85;
+    --color-on-primary: 250 249 247;
+    --color-primary-container: 248 242 231;
+    --color-on-primary-container: 47 37 32;
+    --color-secondary: 155 139 122;
+    --color-on-secondary: 250 249 247;
+    --color-secondary-container: 245 238 229;
+    --color-on-secondary-container: 43 37 31;
+    --color-tertiary: 157 146 135;
+    --color-on-tertiary: 250 249 247;
+    --color-tertiary-container: 247 242 233;
+    --color-on-tertiary-container: 42 36 30;
+    --color-surface: 250 249 247;
+    --color-on-surface: 92 77 66;
+    --color-surface-variant: 248 242 231;
+    --color-on-surface-variant: 109 100 89;
+    --color-outline: 155 139 122;
+    --color-outline-variant: 208 194 177;
+    --color-surface-container: 245 243 240;
+    --color-surface-container-high: 240 237 233;
+    --color-surface-container-highest: 235 221 204;
+  }
+
+  * {
+    border-color: rgb(208, 194, 177);
+  }
+
+  body {
+    @apply bg-surface-light dark:bg-surface-dark font-sans text-body-large transition-colors duration-300;
+    color: rgb(var(--color-on-surface));
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  .dark body {
+    color: #f3f4f6;
+  }
+
+  h1 { @apply text-display-medium font-normal; }
+  h2 { @apply text-headline-large font-normal; }
+  h3 { @apply text-headline-medium font-normal; }
+  h4 { @apply text-headline-small font-normal; }
+  h5 { @apply text-title-large font-normal; }
+  h6 { @apply text-title-medium font-medium; }
+}
+
+@layer components {
+  .surface-container {
+    @apply bg-surface-light-container/30;
+  }
+  
+  .surface-container-high {
+    @apply bg-surface-light-container-high/40;
+  }
+  
+  .surface-container-highest {
+    @apply bg-surface-light-container-highest/50;
+  }
+
+  .btn-filled {
+    @apply bg-primary-40 text-on-primary px-6 py-3 rounded-full font-medium text-label-large transition-all duration-200 hover:shadow-elevation-1 active:shadow-none;
+  }
+
+  .btn-filled-small {
+    @apply bg-primary-40 text-on-primary px-4 py-2 rounded-full font-medium text-label-medium transition-all duration-200 hover:shadow-elevation-1 active:shadow-none;
+  }
+
+  .btn-outlined-small {
+    @apply bg-transparent text-primary-40 px-4 py-2 rounded-full font-medium text-label-medium transition-all duration-200;
+    border: 1px solid rgb(121, 116, 126);
+  }
+
+  .btn-outlined {
+    @apply bg-transparent text-primary-40 px-6 py-3 rounded-full font-medium text-label-large transition-all duration-200;
+    border: 1px solid rgb(121, 116, 126);
+  }
+
+  .btn-outlined:hover {
+    background-color: rgba(103, 80, 164, 0.08);
+  }
+
+  .btn-text {
+    @apply bg-transparent text-primary-40 px-4 py-2 rounded-full font-medium text-label-large transition-all duration-200;
+  }
+
+  .btn-text:hover {
+    background-color: rgba(103, 80, 164, 0.08);
+  }
+
+  .btn-fab {
+    @apply bg-primary-80 text-on-primary w-14 h-14 rounded-2xl flex items-center justify-center shadow-elevation-3 hover:shadow-elevation-4 transition-all duration-200;
+  }
+
+  .card-elevated {
+    @apply bg-surface-light-container/40 rounded-xl;
+    box-shadow: 0px 1px 2px 0px rgba(139, 115, 85, 0.15), 0px 1px 3px 1px rgba(139, 115, 85, 0.075);
+  }
+
+  .card-filled {
+    @apply bg-surface-light-container/30 rounded-xl;
+  }
+
+  .input-filled {
+    @apply bg-surface-light-container/50 border-0 border-b-2 border-outline-variant/30 rounded-2xl px-6 pt-6 pb-2 focus:border-primary-40/60 focus:ring-0 transition-all duration-300 focus:scale-[1.01];
+  }
+
+  .input-filled:focus {
+    box-shadow: 0px 2px 4px 0px rgba(139, 115, 85, 0.2), 0px 4px 8px 2px rgba(139, 115, 85, 0.1);
+  }
+
+  .input-outlined {
+    @apply bg-transparent border rounded-2xl px-6 py-3 focus:border-primary-40 focus:ring-0 transition-all duration-300 focus:shadow-lg;
+    border-color: rgb(208, 194, 177);
+  }
+
+  .chip {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-label-medium bg-surface-light-container-high border;
+    border-color: rgb(208, 194, 177);
+  }
+
+  .chip-elevated {
+    @apply chip shadow-elevation-1;
+  }
+
+  .state-layer {
+    @apply relative overflow-hidden;
+  }
+
+  .state-layer::before {
+    content: '';
+    @apply absolute inset-0 bg-current opacity-0 transition-opacity duration-150;
+  }
+
+  .state-layer:hover::before {
+    opacity: 0.08;
+  }
+
+  .state-layer:active::before {
+    opacity: 0.12;
+  }
+}

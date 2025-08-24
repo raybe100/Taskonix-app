@@ -1,0 +1,99 @@
+/* Beautiful Dark Mode Overrides */
+
+/* Card styles */
+.dark .card-elevated {
+  @apply bg-surface-dark-container border border-gray-700/30;
+}
+
+/* Surface containers */
+.dark .surface-container {
+  @apply bg-surface-dark-container-high;
+}
+
+/* Text colors */
+.dark .text-on-surface {
+  @apply text-gray-100;
+}
+
+.dark .text-on-surface-variant {
+  @apply text-gray-300;
+}
+
+/* Button styles */
+.dark .btn-filled {
+  @apply bg-accent-dark-coral hover:bg-accent-dark-coral/90 text-white;
+}
+
+.dark .btn-outlined {
+  @apply border-gray-600 text-gray-300 hover:bg-white/10;
+}
+
+/* Priority indicators - beautiful dark mode colors */
+.dark .priority-high {
+  @apply bg-priority-dark-high;
+}
+
+.dark .priority-medium {
+  @apply bg-priority-dark-medium;
+}
+
+.dark .priority-low {
+  @apply bg-priority-dark-low;
+}
+
+/* Input fields */
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="datetime-local"],
+.dark input[type="number"],
+.dark select,
+.dark textarea {
+  @apply bg-surface-dark-container border-gray-600 text-gray-100 placeholder-gray-400;
+  @apply focus:border-accent-dark-gold focus:ring-accent-dark-gold;
+}
+
+/* Calendar specific */
+.dark .calendar-day {
+  @apply bg-surface-dark-container-high hover:bg-surface-dark-bright border-gray-700/30;
+}
+
+.dark .calendar-day.selected {
+  @apply bg-accent-dark-purple text-white;
+}
+
+.dark .calendar-today {
+  @apply bg-accent-dark-gold/20 border-accent-dark-gold text-accent-dark-gold;
+}
+
+/* Task items */
+.dark .task-item {
+  @apply bg-surface-dark-container border-gray-700/30 hover:bg-surface-dark-container-high;
+}
+
+/* Notification styles */
+.dark .notification-success {
+  @apply bg-accent-dark-emerald/20 border-accent-dark-emerald text-accent-dark-emerald;
+}
+
+.dark .notification-error {
+  @apply bg-priority-dark-high/20 border-priority-dark-high text-priority-dark-high;
+}
+
+.dark .notification-info {
+  @apply bg-accent-dark-teal/20 border-accent-dark-teal text-accent-dark-teal;
+}
+
+/* Footer */
+.dark .surface-container-high {
+  @apply bg-surface-dark-container-high;
+}
+
+/* Chip/Pill styles for dark mode */
+.dark .chip {
+  @apply bg-surface-dark-container-high text-gray-200 border-gray-600/30;
+}
+
+.dark .chip-elevated {
+  @apply bg-surface-dark-container-high text-gray-200 border-gray-600/30;
+}
