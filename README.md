@@ -1,6 +1,6 @@
-# Todo + Calendar App
+# Taskonix
 
-Ultra-minimal MVP for a Todo + Calendar web app built with React + TypeScript + Vite.
+Master your time, conquer your goals - A powerful SaaS productivity app built with React + TypeScript + Vite.
 
 ## Features
 

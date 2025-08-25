@@ -63,7 +63,7 @@ export function exportTasksAsICal(tasks: Task[]): void {
       
       return [
         'BEGIN:VEVENT',
-        `UID:${task.id}@todo-calendar-app`,
+        `UID:${task.id}@taskonix`,
         `DTSTART:${formatDateForICal(startDate)}`,
         `DTEND:${formatDateForICal(endDate)}`,
         `SUMMARY:${task.title}`,
@@ -78,7 +78,7 @@ export function exportTasksAsICal(tasks: Task[]): void {
   const icalContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Todo Calendar App//Todo Calendar App//EN',
+    'PRODID:-//Taskonix//Taskonix//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...icalEvents,

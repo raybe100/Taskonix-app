@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Task, TaskFormData, Priority } from '../types';
 import { findNextAvailableSlot } from '../lib/schedule';
 
-const STORAGE_KEY = 'todo-calendar-tasks';
+const STORAGE_KEY = 'taskonix-tasks';
 
 /**
  * Custom hook for managing tasks with localStorage persistence

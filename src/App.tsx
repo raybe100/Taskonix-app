@@ -43,10 +43,10 @@ function App() {
   } = useHybridTasks();
   
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>(() => {
-    return (localStorage.getItem('todo-calendar-view-mode') as 'list' | 'calendar') || 'list';
+    return (localStorage.getItem('taskonix-view-mode') as 'list' | 'calendar') || 'list';
   });
   const [calendarView, setCalendarView] = useState<'month' | 'week'>(() => {
-    return (localStorage.getItem('todo-calendar-calendar-view') as 'month' | 'week') || 'month';
+    return (localStorage.getItem('taskonix-calendar-view') as 'month' | 'week') || 'month';
   });
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => areNotificationsEnabled());
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -77,12 +77,12 @@ function App() {
 
   const handleViewModeChange = (mode: 'list' | 'calendar') => {
     setViewMode(mode);
-    localStorage.setItem('todo-calendar-view-mode', mode);
+    localStorage.setItem('taskonix-view-mode', mode);
   };
 
   const handleCalendarViewChange = (view: 'month' | 'week') => {
     setCalendarView(view);
-    localStorage.setItem('todo-calendar-calendar-view', view);
+    localStorage.setItem('taskonix-calendar-view', view);
   };
 
   const handleNotificationToggle = async () => {
@@ -103,6 +103,86 @@ function App() {
       scheduleTaskNotifications(tasks);
     }
   }, [tasks, notificationsEnabled]);
+
+  // Direct DOM modal as last resort
+  useEffect(() => {
+    console.log('useEffect: isPricingModalOpen changed to:', isPricingModalOpen);
+    
+    if (isPricingModalOpen) {
+      // Remove any existing modal
+      const existing = document.getElementById('emergency-modal');
+      if (existing) {
+        existing.remove();
+      }
+      
+      // Create modal directly
+      const modal = document.createElement('div');
+      modal.id = 'emergency-modal';
+      modal.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(4px) !important;
+        z-index: 9999999 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      `;
+      
+      modal.innerHTML = `
+        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); max-width: 500px; text-align: center;">
+          <h1 style="color: #1f2937; font-size: 32px; font-weight: bold; margin-bottom: 16px;">Choose Your Plan</h1>
+          <p style="color: #6b7280; font-size: 18px; margin-bottom: 32px;">Select a plan to get started with Taskonix</p>
+          
+          <div style="margin-bottom: 24px;">
+            <button id="free-plan" style="display: block; width: 100%; padding: 20px; margin-bottom: 16px; background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; text-align: left;">
+              <div style="font-weight: 600; color: #1f2937; font-size: 18px; margin-bottom: 4px;">Free Plan</div>
+              <div style="color: #6b7280; font-size: 14px;">$0/month - Basic task management</div>
+            </button>
+            
+            <button id="pro-plan" style="display: block; width: 100%; padding: 20px; margin-bottom: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 8px; cursor: pointer; text-align: left; color: white;">
+              <div style="font-weight: 600; font-size: 18px; margin-bottom: 4px;">Pro Plan</div>
+              <div style="opacity: 0.9; font-size: 14px;">$9.99/month - All premium features</div>
+            </button>
+          </div>
+          
+          <button id="close-pricing" style="background: #6b7280; color: white; padding: 12px 24px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; width: 100%;">
+            Close
+          </button>
+        </div>
+      `;
+      
+      // Add to body
+      document.body.appendChild(modal);
+      
+      // Add event handlers
+      document.getElementById('free-plan').onclick = () => {
+        console.log('Free plan selected');
+        handlePlanSelect({ id: 'free', name: 'Free', price: 0, interval: 'month', features: [] });
+      };
+      
+      document.getElementById('pro-plan').onclick = () => {
+        console.log('Pro plan selected');
+        handlePlanSelect({ id: 'pro', name: 'Pro', price: 9.99, interval: 'month', features: [] });
+      };
+      
+      document.getElementById('close-pricing').onclick = () => {
+        setIsPricingModalOpen(false);
+      };
+      
+      console.log('Emergency modal created and added to body');
+    } else {
+      // Remove modal when closed
+      const existing = document.getElementById('emergency-modal');
+      if (existing) {
+        existing.remove();
+        console.log('Emergency modal removed');
+      }
+    }
+  }, [isPricingModalOpen]);
 
   const handleApplyTemplate = (templateTasks: TaskFormData[]) => {
     // Check if adding these tasks would exceed the limit
@@ -187,11 +267,18 @@ function App() {
       <header className="bg-surface-light dark:bg-surface-dark surface-container-high dark:bg-surface-dark-container-high shadow-elevation-1 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 max-w-7xl">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-headline-large text-on-surface dark:text-white">Todo + Calendar</h1>
-              <p className="text-body-medium text-on-surface-variant dark:text-gray-300">
-                Organize your tasks and schedule your time beautifully
-              </p>
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo.png" 
+                alt="Taskonix Logo" 
+                className="w-12 h-12 rounded-full shadow-elevation-2"
+              />
+              <div>
+                <h1 className="text-headline-large text-on-surface dark:text-white">Taskonix</h1>
+                <p className="text-body-medium text-on-surface-variant dark:text-gray-300">
+                  Master your time, conquer your goals
+                </p>
+              </div>
             </div>
             
             {/* User Authentication & Controls */}
@@ -277,11 +364,15 @@ function App() {
           <main className="container mx-auto px-6 py-8 max-w-7xl">
             <div className="text-center max-w-4xl mx-auto">
               <div className="card-elevated p-12 mb-8 animate-scale-in">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary-40 to-secondary-40 dark:from-accent-dark-gold dark:to-accent-dark-coral rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elevation-3">
-                  <span className="text-4xl">✨</span>
+                <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-elevation-3 overflow-hidden">
+                  <img 
+                    src="/logo.png" 
+                    alt="Taskonix Logo" 
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </div>
                 <h2 className="text-display-small text-on-surface dark:text-white mb-4">
-                  Welcome to Todo + Calendar
+                  Welcome to Taskonix
                 </h2>
                 <p className="text-title-medium text-on-surface-variant dark:text-gray-300 mb-8 leading-relaxed">
                   The most beautiful and intelligent task management app. Organize your life with voice commands, smart scheduling, and seamless cloud sync.
@@ -313,7 +404,12 @@ function App() {
                 </div>
                 
                 <button 
-                  onClick={() => setIsPricingModalOpen(true)}
+                  onClick={() => {
+                    console.log('Get Started Free clicked!');
+                    console.log('Current modal state:', isPricingModalOpen);
+                    setIsPricingModalOpen(true);
+                    console.log('Modal should now be:', true);
+                  }}
                   className="btn-filled bg-gradient-to-r from-primary-40 to-secondary-40 dark:from-accent-dark-gold dark:to-accent-dark-coral text-on-primary dark:text-black px-8 py-3 text-title-small font-medium hover:shadow-elevation-4 transition-all duration-300"
                 >
                   🚀 Get Started Free
@@ -503,12 +599,71 @@ function App() {
         )}
 
         {/* Payment Modals */}
-        <PricingModal
-          isOpen={isPricingModalOpen}
-          onClose={() => setIsPricingModalOpen(false)}
-          onSelectPlan={handlePlanSelect}
-          currentPlan={subscription?.plan}
-        />
+        {console.log('Rendering payment section, isPricingModalOpen:', isPricingModalOpen)}
+        {isPricingModalOpen && (
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              backgroundColor: 'rgba(255, 0, 0, 0.9)',
+              zIndex: 999999,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '20px'
+            }}
+          >
+            <div style={{
+              backgroundColor: 'white',
+              padding: '40px',
+              borderRadius: '10px',
+              border: '5px solid blue',
+              maxWidth: '600px',
+              width: '100%',
+              color: 'black'
+            }}>
+              <h2 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '20px' }}>Choose Your Plan</h2>
+              <p style={{ fontSize: '18px', marginBottom: '30px' }}>Select a plan to get started with Taskonix</p>
+              
+              <div className="space-y-4">
+                <button 
+                  onClick={() => {
+                    console.log('Free plan selected');
+                    handlePlanSelect({ id: 'free', name: 'Free', price: 0, interval: 'month', features: [] });
+                  }}
+                  className="w-full p-4 border rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <div className="font-semibold text-gray-900 dark:text-white">Free Plan</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">$0/month - Basic features</div>
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    console.log('Pro plan selected');
+                    handlePlanSelect({ id: 'pro', name: 'Pro', price: 9.99, interval: 'month', features: [] });
+                  }}
+                  className="w-full p-4 border rounded-lg text-left hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  <div className="font-semibold text-gray-900 dark:text-white">Pro Plan</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">$9.99/month - All features</div>
+                </button>
+              </div>
+              
+              <button 
+                onClick={() => {
+                  console.log('Close clicked');
+                  setIsPricingModalOpen(false);
+                }}
+                className="mt-6 w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         {isPaymentModalOpen && selectedPlan && (
           <PaymentForm
@@ -524,15 +679,10 @@ function App() {
       <footer className="surface-container-high mt-16 py-6">
         <div className="container mx-auto px-6 max-w-7xl text-center">
           <p className="text-body-small text-on-surface-variant">
-            Beautiful Todo + Calendar • Built with Material 3 Design
+            Beautiful Taskonix • Built with Material 3 Design
           </p>
           <p className="text-body-small text-on-surface-variant opacity-70 mt-1">
             Backend: {backend === 'supabase' ? '🗄️ Supabase Database' : '💾 Local Storage'}
-            {backend === 'localStorage' && (
-              <span className="text-tertiary-40 ml-2">
-                • <a href="/SUPABASE_SETUP.md" className="underline hover:no-underline">Setup Supabase for cloud sync</a>
-              </span>
-            )}
           </p>
         </div>
       </footer>

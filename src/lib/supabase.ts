@@ -4,14 +4,16 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Check if Supabase is properly configured
-const isSupabaseConfigured = supabaseUrl && 
+const isSupabaseConfigured = !!(supabaseUrl && 
   supabaseAnonKey && 
   supabaseUrl !== 'your_supabase_project_url_here' &&
   supabaseAnonKey !== 'your_supabase_anon_key_here' &&
   supabaseUrl !== 'https://your-project-id.supabase.co' &&
   supabaseAnonKey !== 'your-anon-key-here' &&
+  supabaseUrl !== 'your_supabase_project_url' &&
+  supabaseAnonKey !== 'your_supabase_anon_key' &&
   supabaseUrl.includes('.supabase.co') &&
-  supabaseAnonKey.startsWith('eyJ');
+  supabaseAnonKey.startsWith('eyJ'));
 
 // Create client with fallback values to prevent errors
 export const supabase = createClient(
