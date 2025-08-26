@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSubscription } from '../hooks/useSubscription';
 
 interface SubscriptionBannerProps {
@@ -7,7 +6,7 @@ interface SubscriptionBannerProps {
 }
 
 export function SubscriptionBanner({ taskCount, onUpgradeClick }: SubscriptionBannerProps) {
-  const { subscription, getFeatureLimits, isWithinLimits, isPremium } = useSubscription();
+  const { getFeatureLimits, isWithinLimits, isPremium } = useSubscription();
   const limits = getFeatureLimits();
   
   // Don't show banner for premium users

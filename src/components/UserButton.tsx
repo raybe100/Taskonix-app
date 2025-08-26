@@ -1,7 +1,5 @@
-import React from 'react';
 import { 
   SignInButton, 
-  SignOutButton, 
   useUser,
   UserButton as ClerkUserButton 
 } from '@clerk/clerk-react';

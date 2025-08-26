@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Task } from '../types';
 import { timeTracker, formatDuration, formatTimeRange } from '../lib/timeTracking';
 

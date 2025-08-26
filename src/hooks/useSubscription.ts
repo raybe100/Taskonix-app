@@ -3,7 +3,7 @@ import { useUser } from '@clerk/clerk-react';
 import { UserSubscription, FEATURE_LIMITS } from '../lib/stripe';
 
 export function useSubscription() {
-  const { user, isSignedIn } = useUser();
+  const { user } = useUser();
   
   const [subscription, setSubscription] = useState<UserSubscription | null>(() => {
     // For demo purposes, start with a free plan

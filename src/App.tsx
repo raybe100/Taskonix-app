@@ -9,7 +9,6 @@ import { TaskTemplates } from './components/TaskTemplates';
 import { TimeTracking } from './components/TimeTracking';
 import { ProductivityAnalytics } from './components/ProductivityAnalytics';
 import { SmartVoiceAssistant } from './components/SmartVoiceAssistant';
-import { PricingModal } from './components/PricingModal';
 import { PaymentForm } from './components/PaymentForm';
 import { SubscriptionBanner } from './components/SubscriptionBanner';
 import { UserButton } from './components/UserButton';
@@ -25,11 +24,10 @@ import {
   requestNotificationPermission, 
   scheduleTaskNotifications, 
   areNotificationsEnabled,
-  getNotificationPermission 
 } from './lib/notifications';
 
 function App() {
-  const { isSignedIn, user } = useUser();
+  useUser();
   const { 
     tasks, 
     loading, 
@@ -38,7 +36,6 @@ function App() {
     deleteTask, 
     updateTask,
     suggestTimeSlot,
-    importTasks,
     backend 
   } = useHybridTasks();
   
@@ -159,17 +156,17 @@ function App() {
       document.body.appendChild(modal);
       
       // Add event handlers
-      document.getElementById('free-plan').onclick = () => {
+      document.getElementById('free-plan')!.onclick = () => {
         console.log('Free plan selected');
         handlePlanSelect({ id: 'free', name: 'Free', price: 0, interval: 'month', features: [] });
       };
       
-      document.getElementById('pro-plan').onclick = () => {
+      document.getElementById('pro-plan')!.onclick = () => {
         console.log('Pro plan selected');
         handlePlanSelect({ id: 'pro', name: 'Pro', price: 9.99, interval: 'month', features: [] });
       };
       
-      document.getElementById('close-pricing').onclick = () => {
+      document.getElementById('close-pricing')!.onclick = () => {
         setIsPricingModalOpen(false);
       };
       
@@ -492,7 +489,7 @@ function App() {
             {/* Export/Import */}
             <ExportImport 
               tasks={tasks}
-              onImportTasks={importTasks || (() => {})}
+              onImportTasks={() => {}}
             />
 
             {/* Advanced Voice Interface */}
@@ -599,7 +596,6 @@ function App() {
         )}
 
         {/* Payment Modals */}
-        {console.log('Rendering payment section, isPricingModalOpen:', isPricingModalOpen)}
         {isPricingModalOpen && (
           <div 
             style={{

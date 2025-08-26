@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PRICING_PLANS, PricingPlan } from '../lib/stripe';
 
 interface PricingModalProps {

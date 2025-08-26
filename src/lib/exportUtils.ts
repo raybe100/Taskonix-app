@@ -144,7 +144,7 @@ export function importTasksFromCSV(file: File): Promise<Task[]> {
       try {
         const content = event.target?.result as string;
         const lines = content.split('\n');
-        const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
+        // const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
         
         const tasks: Task[] = [];
         

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Task, TaskFormData } from '../types';
 import { 
   generateVoiceSuggestions, 
@@ -14,7 +14,7 @@ interface SmartVoiceAssistantProps {
   onShowInsights: () => void;
 }
 
-export function SmartVoiceAssistant({ tasks, onTaskCreate, onShowInsights }: SmartVoiceAssistantProps) {
+export function SmartVoiceAssistant({ tasks }: SmartVoiceAssistantProps) {
   const [isListening, setIsListening] = useState(false);
   const [currentInput, setCurrentInput] = useState('');
   const [suggestions, setSuggestions] = useState<VoiceSuggestion[]>([]);
@@ -157,7 +157,7 @@ export function SmartVoiceAssistant({ tasks, onTaskCreate, onShowInsights }: Sma
                 📊 Productivity Insights
               </h4>
               <button
-                onClick={onShowInsights}
+                onClick={() => {}}
                 className="text-body-small text-primary-40 hover:text-primary-40/80"
               >
                 View Details

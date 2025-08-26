@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Task, TaskFormData } from '../types';
 import { 
   parseVoiceCommand, 
@@ -27,7 +27,7 @@ export function AdvancedVoiceInterface({
   const [feedback, setFeedback] = useState<string>('');
   const [speechSupported] = useState(() => isSpeechRecognitionSupported());
 
-  const showFeedback = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
+  const showFeedback = useCallback((message: string) => {
     setFeedback(message);
     setTimeout(() => setFeedback(''), 4000);
   }, []);
@@ -46,7 +46,7 @@ export function AdvancedVoiceInterface({
             category: command.updates.category,
             description: command.updates.description
           });
-          showFeedback(`Created task: "${command.updates.title}"`, 'success');
+          showFeedback(`Created task: "${command.updates.title}"`);
         }
         break;
 
@@ -65,9 +65,9 @@ export function AdvancedVoiceInterface({
             if (command.updates.description) updates.description = command.updates.description;
 
             onTaskUpdate(task.id, updates);
-            showFeedback(`Updated task: "${task.title}"`, 'success');
+            showFeedback(`Updated task: "${task.title}"`);
           } else {
-            showFeedback(`Task "${command.taskIdentifier}" not found`, 'error');
+            showFeedback(`Task "${command.taskIdentifier}" not found`);
           }
         }
         break;
@@ -78,9 +78,9 @@ export function AdvancedVoiceInterface({
           if (matchingTasks.length > 0) {
             const task = matchingTasks[0];
             onTaskDelete(task.id);
-            showFeedback(`Deleted task: "${task.title}"`, 'success');
+            showFeedback(`Deleted task: "${task.title}"`);
           } else {
-            showFeedback(`Task "${command.taskIdentifier}" not found`, 'error');
+            showFeedback(`Task "${command.taskIdentifier}" not found`);
           }
         }
         break;
@@ -91,9 +91,9 @@ export function AdvancedVoiceInterface({
           if (matchingTasks.length > 0) {
             const task = matchingTasks[0];
             onTaskDelete(task.id); // For now, completing = deleting
-            showFeedback(`Completed task: "${task.title}"`, 'success');
+            showFeedback(`Completed task: "${task.title}"`);
           } else {
-            showFeedback(`Task "${command.taskIdentifier}" not found`, 'error');
+            showFeedback(`Task "${command.taskIdentifier}" not found`);
           }
         }
         break;
@@ -104,9 +104,9 @@ export function AdvancedVoiceInterface({
           if (matchingTasks.length > 0) {
             const task = matchingTasks[0];
             onTaskUpdate(task.id, { start: command.newDate });
-            showFeedback(`Moved task "${task.title}" to ${new Date(command.newDate).toLocaleDateString()}`, 'success');
+            showFeedback(`Moved task "${task.title}" to ${new Date(command.newDate).toLocaleDateString()}`);
           } else {
-            showFeedback(`Task "${command.taskIdentifier}" not found`, 'error');
+            showFeedback(`Task "${command.taskIdentifier}" not found`);
           }
         }
         break;
@@ -114,12 +114,12 @@ export function AdvancedVoiceInterface({
       case 'search':
         if (command.newDate) {
           onTaskSearch?.(command.newDate);
-          showFeedback(`Searching for tasks: ${command.newDate}`, 'info');
+          showFeedback(`Searching for tasks: ${command.newDate}`);
         }
         break;
 
       default:
-        showFeedback('Command not recognized', 'error');
+        showFeedback('Command not recognized');
     }
   }, [tasks, onTaskCreate, onTaskUpdate, onTaskDelete, onTaskSearch, showFeedback]);
 
@@ -143,7 +143,7 @@ export function AdvancedVoiceInterface({
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      showFeedback('Voice recognition error', 'error');
+      showFeedback('Voice recognition error');
       setIsListening(false);
     };
 

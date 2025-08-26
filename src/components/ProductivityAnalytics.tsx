@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Task } from '../types';
 import { timeTracker, formatDuration } from '../lib/timeTracking';
 

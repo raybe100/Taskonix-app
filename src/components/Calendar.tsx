@@ -75,9 +75,6 @@ export function Calendar({ tasks, onTaskClick, onDateClick, onTaskCreate, onTask
     setCurrentDate(new Date());
   };
 
-  const handleMonthYearSelect = (year: number, month: number) => {
-    setCurrentDate(new Date(year, month, 1));
-  };
 
   const handleQuickSaveTask = useCallback(() => {
     if (!onTaskCreate || !quickEditingDate || !quickEditTitle.trim()) return;

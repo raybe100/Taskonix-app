@@ -8,9 +8,6 @@ import {
   nextDay,
   addWeeks,
   getDay,
-  setDay,
-  parse,
-  isValid
 } from 'date-fns';
 
 export interface VoiceSuggestion {
@@ -363,7 +360,7 @@ export function findTasksByTitle(tasks: any[], searchTitle: string): any[] {
     const titleWords = normalizedTitle.split(/\s+/);
     
     return searchWords.some(searchWord => 
-      titleWords.some(titleWord => 
+      titleWords.some((titleWord: string) => 
         titleWord.includes(searchWord) || searchWord.includes(titleWord)
       )
     );
@@ -457,7 +454,7 @@ function parseDateExpressions(text: string): { date?: Date; remainingText: strin
     const match = remainingText.match(pattern);
     if (match) {
       const weekdayName = match[1] || match[0];
-      const targetWeekday = weekdays[weekdayName];
+      const targetWeekday = weekdays[weekdayName] as 0 | 1 | 2 | 3 | 4 | 5 | 6;
       const isNext = match[0].includes('next');
       const isThis = match[0].includes('this');
       
@@ -467,27 +464,27 @@ function parseDateExpressions(text: string): { date?: Date; remainingText: strin
         
         if (isNext) {
           // Always next occurrence (next week)
-          targetDate = nextDay(today, targetWeekday);
+          targetDate = nextDay(today, targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6);
           if (getDay(targetDate) === currentWeekday) {
             targetDate = addWeeks(targetDate, 1);
           }
         } else if (isThis) {
           // This week's occurrence
-          if (targetWeekday > currentWeekday) {
-            targetDate = nextDay(today, targetWeekday);
-          } else if (targetWeekday === currentWeekday) {
+          if (targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6 > currentWeekday) {
+            targetDate = nextDay(today, targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6);
+          } else if (targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6 === currentWeekday) {
             targetDate = today; // Today if it's the same weekday
           } else {
-            targetDate = nextDay(today, targetWeekday); // Next week if already passed
+            targetDate = nextDay(today, targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6); // Next week if already passed
           }
         } else {
           // Just "monday" - next occurrence
-          if (targetWeekday > currentWeekday) {
-            targetDate = nextDay(today, targetWeekday);
-          } else if (targetWeekday === currentWeekday) {
+          if (targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6 > currentWeekday) {
+            targetDate = nextDay(today, targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6);
+          } else if (targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6 === currentWeekday) {
             targetDate = today; // Today if it's the same weekday
           } else {
-            targetDate = nextDay(today, targetWeekday); // Next week
+            targetDate = nextDay(today, targetWeekday as 0 | 1 | 2 | 3 | 4 | 5 | 6); // Next week
           }
         }
         

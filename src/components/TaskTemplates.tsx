@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TaskFormData } from '../types';
 import { TaskTemplate, getAllTemplates, applyTemplate } from '../lib/templates';
 

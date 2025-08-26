@@ -124,9 +124,7 @@ export function CalendarWeekView({
   tasks, 
   onTaskClick, 
   onDateClick, 
-  onTaskCreate, 
-  onTaskDelete, 
-  onTaskUpdate 
+  onTaskCreate 
 }: CalendarWeekViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   
