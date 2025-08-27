@@ -689,7 +689,7 @@ function App() {
             Beautiful Taskonix • Built with Material 3 Design
           </p>
           <p className="text-body-small text-on-surface-variant opacity-70 mt-1">
-            Backend: {backend === 'supabase' ? '🗄️ Supabase Database' : '💾 Local Storage'} | Error: {error || 'None'} | Env: {import.meta.env.MODE} | URL: {import.meta.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING'} | Key: {import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'}
+            Backend: {backend === 'supabase' ? '🗄️ Supabase Database' : '💾 Local Storage'}
           </p>
         </div>
       </footer>

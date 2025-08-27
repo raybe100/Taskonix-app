@@ -28,7 +28,6 @@ export function useSupabaseTasks() {
       setTasks(appTasks);
     } catch (error) {
       console.error('Error loading tasks from Supabase:', error);
-      console.error('Full error details:', JSON.stringify(error, null, 2));
       setError(`Failed to load tasks: ${(error as any)?.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
