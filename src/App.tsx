@@ -260,22 +260,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-surface-light dark:bg-surface-dark transition-colors duration-300">
-      {/* Debug Banner - REMOVE AFTER DEBUGGING */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        background: 'red',
-        color: 'white',
-        padding: '8px',
-        fontSize: '12px',
-        zIndex: 9999,
-        textAlign: 'center'
-      }}>
-        DEBUG: Env={import.meta.env.MODE} | URL={import.meta.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING'} | Key={import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'} | Backend={backend}
-      </div>
-      
       {/* App Header */}
       <header className="bg-surface-light dark:bg-surface-dark surface-container-high dark:bg-surface-dark-container-high shadow-elevation-1 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 max-w-7xl">
@@ -705,7 +689,7 @@ function App() {
             Beautiful Taskonix • Built with Material 3 Design
           </p>
           <p className="text-body-small text-on-surface-variant opacity-70 mt-1">
-            Backend: {backend === 'supabase' ? '🗄️ Supabase Database' : '💾 Local Storage'}
+            Backend: {backend === 'supabase' ? '🗄️ Supabase Database' : '💾 Local Storage'} | Env: {import.meta.env.MODE} | URL: {import.meta.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING'} | Key: {import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'}
           </p>
         </div>
       </footer>
