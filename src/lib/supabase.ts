@@ -24,6 +24,20 @@ const isSupabaseConfigured = !!(supabaseUrl &&
 
 console.log('Supabase Configuration Result:', isSupabaseConfigured);
 
+// Test connection immediately
+if (isSupabaseConfigured) {
+  supabase.from('tasks').select('count').single()
+    .then(result => {
+      console.log('Supabase connection test:', result.error ? 'FAILED' : 'SUCCESS');
+      if (result.error) {
+        console.error('Connection error:', result.error);
+      }
+    })
+    .catch(err => {
+      console.error('Connection test failed:', err);
+    });
+}
+
 // Create client with fallback values to prevent errors
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
