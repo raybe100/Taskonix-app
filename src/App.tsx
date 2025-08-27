@@ -283,7 +283,8 @@ function App() {
                  style={{
                    backgroundColor: backend === 'supabase' ? '#10b981' : '#f59e0b',
                    color: 'white'
-                 }}>
+                 }}
+                 title={`Environment: ${import.meta.env.MODE} | URL: ${import.meta.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING'} | Key: ${import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'}`}>
               <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
               {backend === 'supabase' ? '🗄️ Supabase' : '💾 Local Storage'}
             </div>
