@@ -10,6 +10,14 @@ export function useHybridTasks() {
   const supabaseHook = useSupabaseTasks();
   const localStorageHook = useTasks();
   
+  // Debug logging
+  console.log('Hybrid Tasks Debug:', {
+    isConfigured,
+    supabaseError: supabaseHook.error,
+    supabaseLoading: supabaseHook.loading,
+    supabaseTasks: supabaseHook.tasks.length
+  });
+  
   // Use Supabase if configured AND no connection error, otherwise fall back to localStorage
   if (isConfigured && !supabaseHook.error) {
     return {
@@ -17,6 +25,12 @@ export function useHybridTasks() {
       backend: 'supabase' as const
     };
   }
+  
+  console.log('Falling back to localStorage because:', {
+    isConfigured,
+    hasError: !!supabaseHook.error,
+    error: supabaseHook.error
+  });
   
   return {
     ...localStorageHook,

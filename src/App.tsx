@@ -278,6 +278,16 @@ function App() {
               </div>
             </div>
             
+            {/* Backend Status Indicator */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-elevation-1"
+                 style={{
+                   backgroundColor: backend === 'supabase' ? '#10b981' : '#f59e0b',
+                   color: 'white'
+                 }}>
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+              {backend === 'supabase' ? '🗄️ Supabase' : '💾 Local Storage'}
+            </div>
+
             {/* User Authentication & Controls */}
             <div className="flex items-center gap-4">
               {/* User Authentication */}

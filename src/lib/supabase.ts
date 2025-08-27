@@ -3,6 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug environment variables
+console.log('Supabase Environment Check:', {
+  supabaseUrl: supabaseUrl ? `${supabaseUrl.slice(0, 20)}...` : 'undefined',
+  supabaseAnonKey: supabaseAnonKey ? `${supabaseAnonKey.slice(0, 20)}...` : 'undefined',
+  environment: import.meta.env.MODE
+});
+
 // Check if Supabase is properly configured
 const isSupabaseConfigured = !!(supabaseUrl && 
   supabaseAnonKey && 
@@ -14,6 +21,8 @@ const isSupabaseConfigured = !!(supabaseUrl &&
   supabaseAnonKey !== 'your_supabase_anon_key' &&
   supabaseUrl.includes('.supabase.co') &&
   supabaseAnonKey.startsWith('eyJ'));
+
+console.log('Supabase Configuration Result:', isSupabaseConfigured);
 
 // Create client with fallback values to prevent errors
 export const supabase = createClient(
