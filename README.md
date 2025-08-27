@@ -2,7 +2,7 @@
 
 Master your time, conquer your goals - A powerful SaaS productivity app built with React + TypeScript + Vite.
 
-*Deployment ready with TypeScript fixes and Supabase backend*
+*Deployment ready with TypeScript fixes and Supabase backend - Force Deploy*
 
 ## Features
 
