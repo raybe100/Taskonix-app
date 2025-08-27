@@ -260,6 +260,22 @@ function App() {
 
   return (
     <div className="min-h-screen bg-surface-light dark:bg-surface-dark transition-colors duration-300">
+      {/* Debug Banner - REMOVE AFTER DEBUGGING */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        background: 'red',
+        color: 'white',
+        padding: '8px',
+        fontSize: '12px',
+        zIndex: 9999,
+        textAlign: 'center'
+      }}>
+        DEBUG: Env={import.meta.env.MODE} | URL={import.meta.env.VITE_SUPABASE_URL ? 'SET' : 'MISSING'} | Key={import.meta.env.VITE_SUPABASE_ANON_KEY ? 'SET' : 'MISSING'} | Backend={backend}
+      </div>
+      
       {/* App Header */}
       <header className="bg-surface-light dark:bg-surface-dark surface-container-high dark:bg-surface-dark-container-high shadow-elevation-1 sticky top-0 z-10">
         <div className="container mx-auto px-6 py-4 max-w-7xl">
@@ -279,7 +295,7 @@ function App() {
             </div>
             
             {/* Backend Status Indicator */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-elevation-1"
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 hover:shadow-elevation-1"
                  style={{
                    backgroundColor: backend === 'supabase' ? '#10b981' : '#f59e0b',
                    color: 'white'
