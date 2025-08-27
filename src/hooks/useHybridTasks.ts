@@ -32,6 +32,10 @@ export function useHybridTasks() {
     error: supabaseHook.error
   });
   
+  if (supabaseHook.error) {
+    console.error('Supabase error details:', supabaseHook.error);
+  }
+  
   return {
     ...localStorageHook,
     backend: 'localStorage' as const,
