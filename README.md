@@ -2,13 +2,14 @@
 
 Master your time, conquer your goals - A powerful SaaS productivity app built with React + TypeScript + Vite.
 
-*Deployment ready with TypeScript fixes - triggering deployment*
+*Deployment ready with TypeScript fixes and Supabase backend*
 
 ## Features
 
 ✅ **Task Management**
 - Add tasks with title, priority (Low/Medium/High), optional start time, and duration
-- Tasks persist in localStorage (no backend required)
+- Hybrid storage: Uses Supabase database when configured, falls back to localStorage
+- User authentication with Clerk for secure multi-device sync
 - Delete tasks with one click
 
 ✅ **Smart Scheduling** 
@@ -49,7 +50,9 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 - **Tailwind CSS** for styling
 - **date-fns** for date utilities
 - **Web Speech API** for voice input
-- **localStorage** for persistence
+- **Supabase** for database (with localStorage fallback)
+- **Clerk** for authentication
+- **Stripe** for subscription management
 
 ## Project Structure
 
@@ -75,4 +78,15 @@ npm run build
 npm run preview
 ```
 
-The app is fully client-side and can be deployed to any static hosting service.
+The app is fully client-side and can be deployed to any static hosting service. It features hybrid storage that automatically falls back to localStorage if Supabase is not configured.
+
+## Configuration
+
+### Required
+- **Clerk Authentication**: Set `VITE_CLERK_PUBLISHABLE_KEY` in `.env.local`
+
+### Optional
+- **Supabase Database**: Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for cloud storage
+- **Stripe Payments**: Set `VITE_STRIPE_PUBLISHABLE_KEY` for subscription features
+
+Without Supabase configuration, the app will use localStorage for data persistence.
