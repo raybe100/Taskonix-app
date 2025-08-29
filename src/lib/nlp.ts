@@ -1,4 +1,4 @@
-import { Priority, ParsedVoiceInput, VoiceCommand, Task } from '../types';
+import { Priority, ParsedVoiceInput, VoiceCommand, Task, legacyPriorityToPriorityLevel } from '../types';
 import { 
   format, 
   addDays, 
@@ -194,7 +194,8 @@ export function parseVoiceInput(text: string): ParsedVoiceInput {
   // Extract priority (low, medium, high)
   const priorityMatch = cleanedText.match(/\b(low|medium|high)\b/);
   if (priorityMatch) {
-    result.priority = (priorityMatch[1].charAt(0).toUpperCase() + priorityMatch[1].slice(1)) as Priority;
+    const legacyPriority = (priorityMatch[1].charAt(0).toUpperCase() + priorityMatch[1].slice(1)) as Priority;
+    result.priority = legacyPriorityToPriorityLevel(legacyPriority);
     cleanedText = cleanedText.replace(/\b(low|medium|high)\b/, '').trim();
   }
   

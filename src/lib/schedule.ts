@@ -60,7 +60,8 @@ function findSlotInDay(
     .filter(task => task.start && task.durationMin)
     .map(task => ({
       start: parseISO(task.start!),
-      end: addMinutes(parseISO(task.start!), task.durationMin!)
+      end: addMinutes(parseISO(task.start!), task.durationMin!),
+      available: false
     }))
     .sort((a, b) => a.start.getTime() - b.start.getTime());
   
@@ -70,7 +71,8 @@ function findSlotInDay(
   while (isBefore(addMinutes(currentTime, durationMin), workEnd)) {
     const proposedSlot = {
       start: currentTime,
-      end: addMinutes(currentTime, durationMin)
+      end: addMinutes(currentTime, durationMin),
+      available: true
     };
     
     // Check if this slot conflicts with existing tasks

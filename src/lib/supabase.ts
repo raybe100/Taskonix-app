@@ -18,8 +18,41 @@ const isSupabaseConfigured = !!(supabaseUrl &&
 // Create client with fallback values to prevent errors
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key'
+  supabaseAnonKey || 'placeholder-key',
+  {
+    global: {
+      headers: {
+        'apikey': supabaseAnonKey || 'placeholder-key'
+      },
+    },
+    auth: {
+      persistSession: false, // We'll handle auth through Clerk
+      autoRefreshToken: false,
+    },
+  }
 );
+
+// Function to create authenticated Supabase client with Clerk token
+export const createAuthenticatedSupabaseClient = (clerkToken?: string) => {
+  if (!clerkToken) return supabase;
+  
+  return createClient(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key',
+    {
+      global: {
+        headers: {
+          'Authorization': `Bearer ${clerkToken}`,
+          'apikey': supabaseAnonKey || 'placeholder-key',
+        },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
+};
 
 // Export configuration status
 export const isConfigured = isSupabaseConfigured;

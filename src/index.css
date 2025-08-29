@@ -19,15 +19,15 @@
     --color-on-tertiary: 250 249 247;
     --color-tertiary-container: 247 242 233;
     --color-on-tertiary-container: 42 36 30;
-    --color-surface: 250 249 247;
-    --color-on-surface: 92 77 66;
-    --color-surface-variant: 248 242 231;
-    --color-on-surface-variant: 109 100 89;
+    --color-surface: 248 248 248;
+    --color-on-surface: 60 60 60;
+    --color-surface-variant: 245 245 245;
+    --color-on-surface-variant: 100 100 100;
     --color-outline: 155 139 122;
     --color-outline-variant: 208 194 177;
-    --color-surface-container: 245 243 240;
-    --color-surface-container-high: 240 237 233;
-    --color-surface-container-highest: 235 221 204;
+    --color-surface-container: 242 242 242;
+    --color-surface-container-high: 238 238 238;
+    --color-surface-container-highest: 235 235 235;
   }
 
   * {

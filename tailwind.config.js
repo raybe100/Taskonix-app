@@ -59,14 +59,14 @@ export default {
           'container-highest': '#A08968',
         },
         'surface-light': {
-          dim: '#F8F2E7',
-          DEFAULT: '#FAF9F7',
-          bright: '#FAF9F7',
-          'container-lowest': '#FFFFFF',
-          'container-low': '#FAF9F7',
-          'container': '#F5F3F0',
-          'container-high': '#F0EDE9',
-          'container-highest': '#EBDDCC',
+          dim: '#F5F5F5',
+          DEFAULT: '#FAFAFA',
+          bright: '#FAFAFA',
+          'container-lowest': '#FDFDFD',
+          'container-low': '#FAFAFA',
+          'container': '#F7F7F7',
+          'container-high': '#F2F2F2',
+          'container-highest': '#EEEEEE',
         },
         // Beautiful Dark Mode Colors
         'surface-dark': {

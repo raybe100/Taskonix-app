@@ -11,13 +11,7 @@ if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
 }
 
-// Add Web Speech API types for TypeScript
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+// Web Speech API types are now defined in types.ts
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

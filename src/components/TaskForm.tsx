@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Priority, TaskFormData, DEFAULT_CATEGORIES } from '../types';
+import { Priority, TaskFormData, DEFAULT_CATEGORIES, priorityLevelToLegacyPriority } from '../types';
 import { parseVoiceInput, createSpeechRecognition, isSpeechRecognitionSupported } from '../lib/nlp';
 
 interface TaskFormProps {
@@ -56,8 +56,8 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
       setFormData(prev => ({
         ...prev,
         title: parsed.title,
-        priority: parsed.priority || prev.priority,
-        start: parsed.start || prev.start,
+        priority: parsed.priority ? priorityLevelToLegacyPriority(parsed.priority) : prev.priority,
+        start: parsed.start || parsed.start_at || prev.start,
         durationMin: parsed.durationMin || prev.durationMin
       }));
     };
@@ -75,13 +75,13 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
   }, [speechSupported, isListening]);
 
   return (
-    <div className="card-elevated p-6 animate-scale-in">
+    <div className="card-elevated p-5 sm:p-6 animate-scale-in">
       <h2 className="text-headline-small text-on-surface mb-6">Add New Task</h2>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         {/* Title Input with Voice */}
         <div className="relative">
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <div className="flex-1 relative">
               <input
                 id="title"
@@ -104,14 +104,14 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
                 type="button"
                 onClick={startVoiceInput}
                 disabled={isListening}
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center transition-all duration-200 min-w-[48px] min-h-[48px] ${
                   isListening 
                     ? 'bg-error-40 text-white animate-pulse shadow-elevation-3' 
                     : 'bg-surface-light-container/80 text-primary-40 border border-primary-40/30 hover:bg-primary-40/10 hover:border-primary-40/50 shadow-elevation-1 hover:shadow-elevation-2'
                 }`}
                 title="Voice input"
               >
-                <span className="text-xl">{isListening ? '🔴' : '🎤'}</span>
+                <span className="text-lg sm:text-xl">{isListening ? '🔴' : '🎤'}</span>
               </button>
             )}
           </div>
@@ -232,7 +232,7 @@ export function TaskForm({ onSubmit }: TaskFormProps) {
         <button
           type="submit"
           disabled={!formData.title.trim()}
-          className="btn-filled w-full py-4 mt-8 disabled:opacity-50 disabled:cursor-not-allowed state-layer"
+          className="btn-filled w-full py-4 mt-6 sm:mt-8 disabled:opacity-50 disabled:cursor-not-allowed state-layer min-h-[48px] text-base font-medium"
         >
           Add Task
         </button>
