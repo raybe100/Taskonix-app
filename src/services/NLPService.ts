@@ -1,5 +1,6 @@
 import { ParsedVoiceInput, AISuggestions, Location } from '../types';
 import { supabase } from '../lib/supabase';
+import * as chrono from 'chrono-node';
 
 export interface NLPParseRequest {
   text: string;
@@ -19,11 +20,19 @@ export interface NLPParseResponse extends ParsedVoiceInput {
 export class NLPService {
   private static readonly FALLBACK_CONFIDENCE = 0.6;
 
-  // Main parsing function that calls the edge function
+  // Main parsing function that calls the edge function with timeout
   static async parseVoiceInput(request: NLPParseRequest): Promise<ParsedVoiceInput> {
+    const startTime = performance.now();
+    console.log('🚀 Starting voice input parsing...');
+
     try {
-      // Call the Supabase edge function
-      const { data, error } = await supabase.functions.invoke('parse-task', {
+      // Create a promise that rejects after 3 seconds
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Edge function timeout - falling back to client-side parsing')), 3000);
+      });
+
+      // Race the edge function call against the timeout
+      const edgeFunctionPromise = supabase.functions.invoke('parse-task', {
         body: {
           text: request.text,
           userTimezone: request.userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -38,10 +47,14 @@ export class NLPService {
         }
       });
 
+      const { data, error } = await Promise.race([edgeFunctionPromise, timeoutPromise]);
+
       if (error) {
-        console.error('NLP parsing error:', error);
+        const edgeTime = performance.now() - startTime;
+        console.error(`❌ NLP parsing error after ${edgeTime.toFixed(0)}ms:`, error);
         // Fall back to client-side parsing
-        return this.fallbackParse(request.text);
+        console.log('🔄 Falling back to enhanced client-side parsing...');
+        return this.fallbackParse(request.text, request.userTimezone);
       }
 
       // Transform the response to match our interface
@@ -68,19 +81,26 @@ export class NLPService {
         result.radius_m = data.radius_m;
       }
 
-      console.log('NLP parsed result:', result);
+      const edgeTime = performance.now() - startTime;
+      console.log(`✅ Edge function completed in ${edgeTime.toFixed(0)}ms. Result:`, result);
       return result;
 
     } catch (error) {
-      console.error('Failed to call NLP service:', error);
+      const fallbackTime = performance.now() - startTime;
+      console.error(`❌ Edge function failed after ${fallbackTime.toFixed(0)}ms:`, error);
       // Fall back to client-side parsing
-      return this.fallbackParse(request.text);
+      console.log('🔄 Using enhanced fallback parsing...');
+      const fallbackStartTime = performance.now();
+      const result = this.fallbackParse(request.text, request.userTimezone);
+      const totalFallbackTime = performance.now() - fallbackStartTime;
+      console.log(`✅ Fallback parsing completed in ${totalFallbackTime.toFixed(0)}ms`);
+      return result;
     }
   }
 
-  // Fallback client-side parsing when edge function is unavailable
-  private static fallbackParse(text: string): ParsedVoiceInput {
-    console.log('Using fallback parsing for:', text);
+  // Enhanced fallback client-side parsing using chrono-node
+  private static fallbackParse(text: string, userTimezone?: string): ParsedVoiceInput {
+    console.log('🔄 Using enhanced fallback parsing for:', text);
     
     const result: ParsedVoiceInput = {
       title: text.trim(),
@@ -91,63 +111,157 @@ export class NLPService {
       raw_text: text
     };
 
-    // Basic priority detection
+    // Parse dates and times using chrono-node with proper timezone
+    const chronoOptions = {
+      timezone: userTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+      forwardDate: true
+    };
+
+    try {
+      const dateResults = chrono.parse(text, new Date(), chronoOptions);
+      console.log('📅 Chrono fallback parse results:', dateResults);
+
+      if (dateResults.length > 0) {
+        const dateResult = dateResults[0];
+        console.log('📅 Found date/time:', dateResult.text, 'parsed as:', dateResult.start.date());
+        
+        // Determine if this is an event (has specific time) or task
+        const hasTime = dateResult.start.get('hour') !== null && dateResult.start.get('hour') !== undefined;
+        result.type = hasTime ? 'event' : 'task';
+        
+        if (result.type === 'event') {
+          result.start_at = dateResult.start.date().toISOString();
+          
+          // If end time is specified, use it
+          if (dateResult.end) {
+            result.end_at = dateResult.end.date().toISOString();
+          } else {
+            // Default duration based on context
+            let duration = 60; // Default 1 hour
+            if (text.toLowerCase().includes('dentist') || text.toLowerCase().includes('doctor')) {
+              duration = 30; // Medical appointments are usually shorter
+            } else if (text.toLowerCase().includes('meeting') || text.toLowerCase().includes('call')) {
+              duration = 60; // Meetings default to 1 hour
+            }
+            
+            // Check for explicit duration
+            const durationMatch = text.match(/(\d+)\s*(hour|hr|h|minute|min|m)s?/i);
+            if (durationMatch) {
+              const value = parseInt(durationMatch[1]);
+              const unit = durationMatch[2].toLowerCase();
+              duration = unit.startsWith('h') ? value * 60 : value;
+            }
+            
+            const endDate = new Date(result.start_at);
+            endDate.setMinutes(endDate.getMinutes() + duration);
+            result.end_at = endDate.toISOString();
+          }
+          
+          result.all_day = !hasTime;
+        } else {
+          // For tasks, set due_at
+          result.due_at = dateResult.start.date().toISOString();
+        }
+        
+        result.confidence = (result.confidence || this.FALLBACK_CONFIDENCE) + 0.2; // Boost confidence for successful date parsing
+        
+        // Clean up the title by removing the parsed date/time text
+        let cleanTitle = text.replace(dateResult.text, '').trim();
+        // Remove extra spaces and connectors
+        cleanTitle = cleanTitle
+          .replace(/\s+/g, ' ')
+          .replace(/^\s*(at|for|about)\s+/i, '')
+          .replace(/\s+(at|for|about)\s*$/i, '')
+          .trim();
+        
+        if (cleanTitle) {
+          result.title = cleanTitle;
+        }
+      } else {
+        console.log('⚠️ No dates found in fallback parsing');
+      }
+    } catch (error) {
+      console.error('❌ Chrono fallback parsing error:', error);
+    }
+
+    // Enhanced priority detection
     const lowerText = text.toLowerCase();
-    if (lowerText.includes('urgent') || lowerText.includes('asap') || lowerText.includes('emergency')) {
-      result.priority = 5;
-    } else if (lowerText.includes('high') || lowerText.includes('important')) {
-      result.priority = 4;
-    } else if (lowerText.includes('low') || lowerText.includes('later')) {
-      result.priority = 2;
+    const priorityKeywords = {
+      5: ['urgent', 'asap', 'emergency', 'critical', 'immediately'],
+      4: ['high', 'important', 'priority', 'soon'],
+      3: ['medium', 'normal'],
+      2: ['low', 'later', 'when possible'],
+      1: ['someday', 'maybe', 'eventually']
+    };
+
+    for (const [priority, keywords] of Object.entries(priorityKeywords)) {
+      if (keywords.some(keyword => lowerText.includes(keyword))) {
+        result.priority = parseInt(priority) as 1 | 2 | 3 | 4 | 5;
+        console.log(`🔥 Priority detected: ${priority} (${keywords.find(k => lowerText.includes(k))})`);
+        break;
+      }
     }
 
-    // Basic type detection
-    if (lowerText.includes('meeting') || lowerText.includes('appointment') || 
-        lowerText.includes('event') || lowerText.includes('call')) {
+    // Enhanced type detection
+    const eventKeywords = ['meeting', 'appointment', 'event', 'call', 'interview', 'conference', 'presentation', 'lunch', 'dinner'];
+    if (eventKeywords.some(keyword => lowerText.includes(keyword))) {
       result.type = 'event';
+      console.log('📅 Event type detected');
     }
 
-    // Basic time detection
-    const timePatterns = [
-      /\b(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i,
-      /\b\d{1,2}:\d{2}\s*(am|pm)?\b/i,
-      /\b\d{1,2}\s*(am|pm)\b/i,
-      /\bat\s+\d/i
-    ];
-
-    const hasTime = timePatterns.some(pattern => pattern.test(text));
-    if (hasTime && result.type === 'event') {
-      // Set a default start time for today + 1 hour
-      const now = new Date();
-      now.setHours(now.getHours() + 1, 0, 0, 0);
-      result.start_at = now.toISOString();
-      
-      // Default 1 hour duration
-      const endTime = new Date(now);
-      endTime.setHours(endTime.getHours() + 1);
-      result.end_at = endTime.toISOString();
-    }
-
-    // Basic category detection
+    // Enhanced category detection
     const categories = {
-      work: ['meeting', 'call', 'project', 'deadline', 'office'],
-      health: ['doctor', 'dentist', 'appointment', 'checkup'],
-      personal: ['birthday', 'family', 'home', 'clean'],
-      shopping: ['buy', 'purchase', 'store', 'grocery']
+      work: ['meeting', 'call', 'project', 'deadline', 'office', 'client', 'presentation', 'review'],
+      health: ['doctor', 'dentist', 'appointment', 'checkup', 'hospital', 'pharmacy', 'exercise', 'gym'],
+      personal: ['birthday', 'family', 'home', 'clean', 'organize', 'personal', 'mom', 'dad', 'son', 'daughter'],
+      shopping: ['buy', 'purchase', 'store', 'market', 'grocery', 'shopping'],
+      finance: ['bank', 'payment', 'bill', 'tax', 'budget', 'insurance'],
+      travel: ['flight', 'hotel', 'trip', 'vacation', 'travel', 'airport'],
+      learning: ['study', 'course', 'class', 'training', 'learn', 'education'],
+      social: ['party', 'dinner', 'lunch', 'friend', 'event', 'celebrate']
     };
 
     for (const [category, keywords] of Object.entries(categories)) {
       if (keywords.some(keyword => lowerText.includes(keyword))) {
         result.category = category;
+        console.log(`📂 Category detected: ${category}`);
         break;
       }
     }
 
-    // Basic location detection
-    const locationMatch = text.match(/\bat\s+([^,\n]+)/i);
-    if (locationMatch) {
-      result.location_name = locationMatch[1].trim();
+    // Enhanced location detection with multiple patterns
+    const locationPatterns = [
+      /\bat\s+([^,\n]+?)(?:\s|$|,)/i,
+      /\bin\s+([^,\n]+?)(?:\s|$|,)/i,
+      /\s@\s*([^,\n]+?)(?:\s|$|,)/i,
+      /\bto\s+([^,\n]+?)(?:\s|$|,)/i
+    ];
+
+    for (const pattern of locationPatterns) {
+      const locationMatch = text.match(pattern);
+      if (locationMatch) {
+        const location = locationMatch[1].trim();
+        // Filter out common non-location words
+        const nonLocations = ['me', 'him', 'her', 'them', 'it', 'be', 'do', 'go', 'get', 'see', 'know'];
+        if (!nonLocations.includes(location.toLowerCase()) && location.length > 2) {
+          result.location_name = location;
+          console.log(`📍 Location detected: ${location}`);
+          break;
+        }
+      }
     }
+
+    console.log('✅ Fallback parsing result:', {
+      title: result.title,
+      type: result.type,
+      start_at: result.start_at,
+      end_at: result.end_at,
+      due_at: result.due_at,
+      priority: result.priority,
+      category: result.category,
+      location_name: result.location_name,
+      confidence: result.confidence
+    });
 
     return result;
   }

@@ -38,6 +38,12 @@ export function VoiceCapture({
   const isSupported = typeof window !== 'undefined' && 
     ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
+  // Mobile device detection
+  const isMobileDevice = useCallback(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (!!navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  }, []);
+
   // Initialize speech recognition
   const initializeRecognition = useCallback(() => {
     if (!isSupported) return null;
@@ -45,15 +51,21 @@ export function VoiceCapture({
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
-    // Configure recognition settings
-    recognition.continuous = true;
+    const isMobile = isMobileDevice();
+    
+    // Configure recognition settings with mobile optimizations
+    recognition.continuous = isMobile ? false : true; // Mobile works better with non-continuous mode
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 1;
 
+    // Add mobile-specific logging
+    if (isMobile) {
+      console.log('📱 Initializing speech recognition for mobile device');
+    }
+
     // Handle results
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalTranscript = '';
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -62,7 +74,6 @@ export function VoiceCapture({
         const confidence = result[0].confidence;
 
         if (result.isFinal) {
-          finalTranscript += transcript;
           setState(prev => ({ 
             ...prev, 
             transcript: prev.transcript + transcript,
@@ -82,8 +93,8 @@ export function VoiceCapture({
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout(() => {
-        if (state.isRecording) {
-          stopRecording();
+        if (state.isRecording && recognitionRef.current) {
+          recognitionRef.current.stop();
         }
       }, 3000); // Auto-stop after 3 seconds of silence
     };
@@ -131,7 +142,7 @@ export function VoiceCapture({
     };
 
     return recognition;
-  }, [isSupported, onError, state.isRecording]);
+  }, [isSupported, onError, state.isRecording, isMobileDevice]);
 
   // Start recording
   const startRecording = useCallback(async () => {
@@ -142,9 +153,53 @@ export function VoiceCapture({
 
     if (disabled) return;
 
+    const isMobile = isMobileDevice();
+    
     try {
-      // Request microphone permission first
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log(isMobile ? '📱 Starting mobile recording' : '💻 Starting desktop recording');
+      
+      // Mobile-specific audio context setup
+      if (isMobile) {
+        try {
+          // Initialize audio context for mobile
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          
+          if (audioContext.state === 'suspended') {
+            console.log('🔊 Resuming suspended audio context for mobile');
+            await audioContext.resume();
+          }
+          
+          // Request microphone with mobile-optimized constraints
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 44100,
+              channelCount: 1
+            }
+          });
+          
+          // Brief audio test for mobile
+          const source = audioContext.createMediaStreamSource(stream);
+          const analyser = audioContext.createAnalyser();
+          source.connect(analyser);
+          
+          // Clean up test resources
+          stream.getTracks().forEach(track => track.stop());
+          source.disconnect();
+          await audioContext.close();
+          
+          console.log('✅ Mobile audio setup successful');
+        } catch (audioError) {
+          console.error('❌ Mobile audio setup failed:', audioError);
+          onError('Audio setup failed. Please check microphone permissions and try again.');
+          return;
+        }
+      } else {
+        // Standard permission request for desktop
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
       
       const recognition = initializeRecognition();
       if (!recognition) return;
@@ -160,14 +215,33 @@ export function VoiceCapture({
         confidence: 0
       });
 
+      // Add mobile-specific vibration feedback
+      if (isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(50); // Brief vibration to confirm recording started
+      }
+
       recognition.start();
     } catch (error) {
-      onError('Microphone access denied. Please enable microphone permissions.');
+      console.error('Recording start error:', error);
+      if (isMobile) {
+        onError('Microphone access denied. Please enable microphone permissions in your browser settings and refresh the page.');
+      } else {
+        onError('Microphone access denied. Please enable microphone permissions.');
+      }
     }
-  }, [isSupported, disabled, onError, initializeRecognition]);
+  }, [isSupported, disabled, onError, initializeRecognition, isMobileDevice]);
 
   // Stop recording
   const stopRecording = useCallback(async () => {
+    const isMobile = isMobileDevice();
+    
+    console.log(isMobile ? '📱 Stopping mobile recording' : '💻 Stopping desktop recording');
+    
+    // Mobile-specific vibration feedback for stop
+    if (isMobile && 'vibrate' in navigator) {
+      navigator.vibrate([20, 50, 20]); // Double vibration pattern for stop
+    }
+    
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -222,18 +296,65 @@ export function VoiceCapture({
     } finally {
       setState(prev => ({ ...prev, isProcessing: false }));
     }
-  }, [state.transcript, state.confidence, onVoiceResult, onError]);
+  }, [state.transcript, state.confidence, onVoiceResult, onError, isMobileDevice]);
 
-  // Handle mouse/touch events for hold-to-record
+  // Enhanced touch event handlers with mobile optimizations
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const isMobile = isMobileDevice();
+    
+    // Mobile-specific vibration feedback
+    if (isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(30); // Quick vibration on touch
+    }
+    
+    console.log(isMobile ? '📱 Mobile pointer down detected' : '💻 Desktop pointer down detected');
     startRecording();
-  }, [startRecording]);
+  }, [startRecording, isMobileDevice]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const isMobile = isMobileDevice();
+    
+    // Mobile-specific vibration feedback
+    if (isMobile && 'vibrate' in navigator) {
+      navigator.vibrate(20); // Brief vibration on release
+    }
+    
+    console.log(isMobile ? '📱 Mobile pointer up detected' : '💻 Desktop pointer up detected');
+    stopRecording();
+  }, [stopRecording, isMobileDevice]);
+
+  // Enhanced touch handlers specifically for mobile devices
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('👆 Touch start detected');
+    
+    // Mobile vibration feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate(30);
+    }
+    
+    startRecording();
+  }, [startRecording]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('👆 Touch end detected');
+    
+    // Mobile vibration feedback
+    if ('vibrate' in navigator) {
+      navigator.vibrate(20);
+    }
+    
     stopRecording();
   }, [stopRecording]);
 
@@ -241,12 +362,14 @@ export function VoiceCapture({
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('🖱️ Mouse down detected');
     startRecording();
   }, [startRecording]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log('🖱️ Mouse up detected');
     stopRecording();
   }, [stopRecording]);
 
@@ -266,15 +389,16 @@ export function VoiceCapture({
   const recordingDuration = state.isRecording ? 
     Math.floor((Date.now() - startTimeRef.current) / 1000) : 0;
 
-  // Visual feedback classes
+  // Visual feedback classes with larger, more imposing size
   const buttonClasses = `
     relative flex items-center justify-center
-    w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28
+    w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40
     rounded-full
     transition-all duration-200 ease-out
     touch-manipulation select-none
-    min-w-[80px] min-h-[80px]
+    min-w-[96px] min-h-[96px]
     border-0 outline-none focus:outline-none
+    cursor-pointer
     ${disabled ? 
       'bg-gray-300 dark:bg-gray-600 cursor-not-allowed' : 
       state.isRecording ? 
@@ -306,18 +430,23 @@ export function VoiceCapture({
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerUp} // Stop if pointer leaves button
+          onPointerCancel={handlePointerUp} // Stop if pointer is cancelled
+          onTouchStart={handleTouchStart} // Enhanced touch support for mobile
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd} // Stop if touch is cancelled
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp} // Stop if mouse leaves button
           disabled={disabled || !isSupported}
           aria-label={state.isRecording ? 'Release to stop recording' : 'Hold to record voice input'}
+          style={{ WebkitTapHighlightColor: 'transparent' }} // Remove iOS tap highlight
         >
           {/* Button content */}
           <div className="pointer-events-none">
             {state.isProcessing ? (
-              <div className="w-6 h-6 sm:w-8 sm:h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 border-2 sm:border-3 md:border-4 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <span className="text-2xl sm:text-3xl md:text-4xl text-white">
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white">
                 {state.isRecording ? '🎤' : '🎙️'}
               </span>
             )}

@@ -21,14 +21,45 @@ export class SpeechService {
            ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
   }
 
-  // Check permissions
+  // Mobile device detection
+  static isMobileDevice(): boolean {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (!!navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  }
+
+  // Check permissions with mobile-specific handling
   static async checkPermissions(): Promise<boolean> {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       return false;
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Mobile-specific audio constraints for better compatibility
+      const constraints = {
+        audio: SpeechService.isMobileDevice() ? {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100,
+          channelCount: 1
+        } : true
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      
+      // Test audio context on mobile devices
+      if (SpeechService.isMobileDevice()) {
+        try {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+          }
+          await audioContext.close();
+        } catch (audioError) {
+          console.warn('Audio context test failed on mobile:', audioError);
+        }
+      }
+      
       // Immediately stop the stream to clean up
       stream.getTracks().forEach(track => track.stop());
       return true;
@@ -67,9 +98,10 @@ export class SpeechService {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     this.recognition = new SpeechRecognition();
 
-    // Configure recognition
+    // Configure recognition with mobile-specific settings
+    const isMobile = SpeechService.isMobileDevice();
     const defaultOptions: SpeechRecognitionOptions = {
-      continuous: true,
+      continuous: isMobile ? false : true, // Mobile works better with non-continuous mode
       interim_results: true,
       language: 'en-US',
       max_alternatives: 1
@@ -81,6 +113,21 @@ export class SpeechService {
     this.recognition.interimResults = config.interim_results;
     this.recognition.lang = config.language;
     this.recognition.maxAlternatives = config.max_alternatives;
+
+    // Mobile-specific configurations
+    if (isMobile) {
+      console.log('🔧 Configuring speech recognition for mobile device');
+      // Set service hints for mobile browsers
+      if ('serviceURI' in this.recognition) {
+        // Some mobile browsers support service URI configuration
+        (this.recognition as any).serviceURI = null;
+      }
+      
+      // Set grammar weight for better mobile recognition
+      if ('grammars' in this.recognition) {
+        (this.recognition as any).grammars = null;
+      }
+    }
 
     // Set up event handlers
     this.setupEventHandlers();
@@ -213,6 +260,47 @@ export class SpeechService {
       return false;
     }
 
+    const isMobile = SpeechService.isMobileDevice();
+    
+    // Mobile-specific audio context initialization
+    if (isMobile) {
+      try {
+        console.log('📱 Initializing audio context for mobile device');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        if (audioContext.state === 'suspended') {
+          console.log('🔊 Resuming suspended audio context');
+          await audioContext.resume();
+        }
+        
+        // Keep a brief test stream to ensure audio is working
+        const testStream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 44100
+          }
+        });
+        
+        // Quick test to ensure audio is flowing
+        const source = audioContext.createMediaStreamSource(testStream);
+        const analyser = audioContext.createAnalyser();
+        source.connect(analyser);
+        
+        // Clean up test resources immediately
+        testStream.getTracks().forEach(track => track.stop());
+        source.disconnect();
+        await audioContext.close();
+        
+        console.log('✅ Mobile audio context test passed');
+      } catch (audioError) {
+        console.error('❌ Mobile audio context setup failed:', audioError);
+        callbacks.onError('Audio setup failed on mobile device. Please ensure microphone permissions are granted.');
+        return false;
+      }
+    }
+
     // Check permissions first
     const permissionResult = await SpeechService.requestPermissions();
     if (!permissionResult.granted) {
@@ -223,11 +311,22 @@ export class SpeechService {
     this.callbacks = callbacks;
 
     try {
+      console.log(isMobile ? '📱 Starting mobile speech recognition' : '💻 Starting desktop speech recognition');
       this.recognition.start();
       return true;
     } catch (error) {
+      console.error('Speech recognition start error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to start speech recognition';
-      callbacks.onError(errorMessage);
+      
+      // Mobile-specific error handling
+      if (isMobile && errorMessage.includes('not-allowed')) {
+        callbacks.onError('Microphone access denied. Please enable microphone permissions in your browser settings and refresh the page.');
+      } else if (isMobile && errorMessage.includes('network')) {
+        callbacks.onError('Network connection required for speech recognition on mobile devices.');
+      } else {
+        callbacks.onError(errorMessage);
+      }
+      
       return false;
     }
   }

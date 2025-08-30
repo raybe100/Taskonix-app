@@ -6,6 +6,8 @@ import { CalendarView } from './components/CalendarView';
 import { LocationManager } from './components/LocationManager';
 import { NotificationSettings } from './components/NotificationSettings';
 import { UserButton } from './components/UserButton';
+import { HelpButton } from './components/HelpButton';
+import { HelpModal } from './components/HelpModal';
 import { ProtectedContent } from './components/ProtectedContent';
 import { useItemsStore } from './store/useItemsStore';
 import { useDarkMode } from './hooks/useDarkMode';
@@ -17,6 +19,7 @@ function App() {
   const { user } = useUser();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const [currentView, setCurrentView] = useState<ViewMode>('capture');
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   
   
   const {
@@ -155,6 +158,9 @@ function App() {
 
             {/* Right side controls */}
             <div className="flex items-center gap-3">
+              {/* Help button */}
+              <HelpButton onClick={() => setIsHelpOpen(true)} />
+              
               {/* Dark mode toggle */}
               <button
                 onClick={toggleDarkMode}
@@ -350,6 +356,12 @@ function App() {
           </ProtectedContent>
         </main>
       </div>
+
+      {/* Help Modal */}
+      <HelpModal 
+        isOpen={isHelpOpen} 
+        onClose={() => setIsHelpOpen(false)} 
+      />
     </div>
   );
 }

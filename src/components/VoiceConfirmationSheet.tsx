@@ -169,7 +169,7 @@ export function VoiceConfirmationSheet({
 
             {/* Time fields */}
             {formData.type === 'event' && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Start Time
@@ -178,7 +178,7 @@ export function VoiceConfirmationSheet({
                     type="datetime-local"
                     value={formData.start_at ? formData.start_at.slice(0, 16) : ''}
                     onChange={(e) => handleFieldChange('start_at', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
-                    className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 pr-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm datetime-input"
                   />
                 </div>
                 <div>
@@ -189,7 +189,7 @@ export function VoiceConfirmationSheet({
                     type="datetime-local"
                     value={formData.end_at ? formData.end_at.slice(0, 16) : ''}
                     onChange={(e) => handleFieldChange('end_at', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
-                    className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-4 py-3 pr-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm datetime-input"
                   />
                 </div>
               </div>
@@ -204,7 +204,7 @@ export function VoiceConfirmationSheet({
                   type="datetime-local"
                   value={formData.due_at ? formData.due_at.slice(0, 16) : ''}
                   onChange={(e) => handleFieldChange('due_at', e.target.value ? new Date(e.target.value).toISOString() : undefined)}
-                  className="w-full px-4 py-3 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-3 pr-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-40 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm datetime-input"
                 />
               </div>
             )}

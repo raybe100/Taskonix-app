@@ -75,7 +75,8 @@ serve(async (req) => {
       );
     }
 
-    console.log('Parsing text:', text);
+    console.log('🚀 Parsing text:', text);
+    console.log('📅 User timezone:', userTimezone);
 
     // Initialize parsing result
     const result: ParsedResult = {
@@ -92,17 +93,32 @@ serve(async (req) => {
       raw_text: text
     };
 
-    // Parse dates and times using chrono-node
+    // Parse dates and times using chrono-node with enhanced configuration
     const parseOptions = {
       timezone: userTimezone,
       forwardDate: true
     };
 
-    const dateResults = chrono.parse(text, new Date(), parseOptions);
-    console.log('Chrono parse results:', dateResults);
+    // Try multiple parsing strategies for better accuracy
+    let dateResults = chrono.parse(text, new Date(), parseOptions);
+    
+    // If no results, try with casual parser
+    if (dateResults.length === 0) {
+      dateResults = chrono.casual.parse(text, new Date(), parseOptions);
+    }
+    
+    // If still no results, try with strict parser  
+    if (dateResults.length === 0) {
+      dateResults = chrono.strict.parse(text, new Date(), parseOptions);
+    }
+    console.log('📅 Chrono parse results:', dateResults);
 
     if (dateResults.length > 0) {
       const dateResult = dateResults[0];
+      console.log('📅 Parsed date text:', dateResult.text);
+      console.log('📅 Parsed date object:', dateResult.start.date());
+      console.log('📅 Has time:', dateResult.start.get('hour') !== null);
+      
       result.ai_suggestions.parsing_notes.push(`Found date/time: ${dateResult.text}`);
       
       // Determine if this is an event (has specific time) or task
