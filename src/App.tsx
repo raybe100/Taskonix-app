@@ -178,7 +178,7 @@ function App() {
 
       <div className="max-w-7xl mx-auto flex">
         {/* Mobile Bottom Navigation / Desktop Side Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg border-t border-gray-200/50 dark:border-gray-700/50 md:static md:w-80 md:border-r md:border-t-0 md:min-h-screen z-40 md:bg-gradient-to-b md:from-gray-50/80 md:to-white/90 md:dark:from-gray-900/90 md:dark:to-gray-800/95">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:static md:w-80 md:border-r md:border-t-0 md:min-h-screen z-50 md:bg-gradient-to-b md:from-gray-50/80 md:to-white/90 md:dark:from-gray-900/90 md:dark:to-gray-800/95 md:backdrop-blur-lg">
           {/* Desktop Header */}
           <div className="hidden md:block p-6 border-b border-gray-200/50 dark:border-gray-700/50">
             <div className="text-center mb-3">
@@ -189,12 +189,12 @@ function App() {
           </div>
 
           {/* Navigation Items */}
-          <div className="flex md:flex-col md:p-4 md:space-y-2">
+          <div className="flex md:flex-col px-2 py-2 md:p-4 md:space-y-2 justify-around md:justify-start">
             {navigationItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentView(item.id as ViewMode)}
-                className={`group relative flex-1 md:flex-none flex flex-col md:flex-row items-center md:items-start gap-1 md:gap-4 p-3 md:p-4 md:rounded-xl transition-all duration-200 transform hover:scale-[1.02] ${
+                className={`group relative flex-1 md:flex-none flex flex-col md:flex-row items-center md:items-start gap-1 md:gap-4 p-2 md:p-4 rounded-lg md:rounded-xl transition-all duration-200 transform hover:scale-[1.02] min-h-[60px] md:min-h-auto ${
                   currentView === item.id
                     ? 'text-white bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg md:shadow-xl md:border-r-4 border-white/20'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/50 md:hover:bg-gradient-to-br md:hover:from-gray-100/80 md:hover:to-gray-200/40 md:dark:hover:from-gray-800/50 md:dark:hover:to-gray-700/30'
@@ -262,7 +262,7 @@ function App() {
         </nav>
 
         {/* Main Content Area */}
-        <main className="flex-1 pb-20 md:pb-0">
+        <main className="flex-1 pb-24 md:pb-0 w-full">
           <ProtectedContent
             requireAuth={true}
             fallback={
